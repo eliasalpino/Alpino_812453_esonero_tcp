@@ -1,25 +1,55 @@
-/*
- * protocol.h
- *
- * Client header file
- * Definitions, constants and function prototypes for the client
- */
-
-#ifndef PROTOCOL_H_
-#define PROTOCOL_H_
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 
 #include <stdint.h>
 
-// Shared application parameters
-#define SERVER_PORT 27015  // Server port (change if needed)
-#define BUFFER_SIZE 512    // Buffer size for messages
+#include <Ws2tcpip.h>
+#ifdef _WIN32
+  #include <winsock2.h>
+#else
+  #include <arpa/inet.h>
+#endif
 
-// Function prototypes
-// Add here the signatures of the functions implemented by students
+#define DEFAULT_SERVER_IP   "127.0.0.1"
+#define DEFAULT_SERVER_PORT 56700
+#define BUFFER_SIZE         512
 
-/*
- * Example function to implement:
- * int connect_to_server(const char* server_address);
- */
+#define CITY_NAME_LEN 64
 
-#endif /* PROTOCOL_H_ */
+typedef struct {
+    char type;
+    char city[CITY_NAME_LEN];
+} weather_request_t;
+
+typedef struct {
+    uint32_t status;
+    char type;
+    float value;
+} weather_response_t;
+
+#define STATUS_SUCCESS 0u
+#define STATUS_CITY_NOT_FOUND 1u
+#define STATUS_INVALID_REQUEST 2u
+
+int platform_init(void);
+void platform_cleanup(void);
+
+float get_temperature(void);
+float get_humidity(void);
+float get_wind(void);
+float get_pressure(void);
+
+uint32_t float_to_net(float f);
+float net_to_float(uint32_t v);
+
+int send_request_and_receive_response(int sockfd,
+                                      const weather_request_t* req,
+                                      weather_response_t* resp);
+
+#ifdef _WIN32
+  #define STRCASECMP _stricmp
+#else
+  #define STRCASECMP strcasecmp
+#endif
+
+#endif // PROTOCOL_H
