@@ -3,11 +3,15 @@
 
 #include <stdint.h>
 
-#include <Ws2tcpip.h>
 #ifdef _WIN32
-  #include <winsock2.h>
+    #include <winsock2.h>
+    #include <ws2tcpip.h>  
+    typedef int socklen_t;
 #else
-  #include <arpa/inet.h>
+    #include <unistd.h>
+    #include <sys/socket.h>
+    #include <arpa/inet.h>
+    #include <netinet/in.h>
 #endif
 
 #define DEFAULT_SERVER_IP   "127.0.0.1"
@@ -27,7 +31,7 @@ typedef struct {
     float value;
 } weather_response_t;
 
-#define STATUS_SUCCESS 0u
+#define STATUS_SUCCESS        0u
 #define STATUS_CITY_NOT_FOUND 1u
 #define STATUS_INVALID_REQUEST 2u
 
@@ -47,9 +51,10 @@ int send_request_and_receive_response(int sockfd,
                                       weather_response_t* resp);
 
 #ifdef _WIN32
-  #define STRCASECMP _stricmp
+    #define STRCASECMP _stricmp
 #else
-  #define STRCASECMP strcasecmp
+    #define STRCASECMP strcasecmp
 #endif
 
 #endif // PROTOCOL_H
+
